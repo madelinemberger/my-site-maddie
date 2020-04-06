@@ -1,0 +1,145 @@
+---
+title: "Principal Component Analysis"
+author: "Madeline Berger"
+date: "2020-03-05"
+output: html_document
+summary: 'Exploring PCA on fruit and vegetable nutrition data'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+library(ggfortify)
+library(naniar)
+library(VIM)
+library(png)
+library(RColorBrewer)
+```
+
+
+***
+
+####Introduction
+
+
+This project was used to practice Principal Component Analysis (PCA). First, two potential datasets (climate variables or nutrition data^1^) are examined for missingess, and then one is chosen to run a PCA and visualize the results. The data used for the PCA contains rows corresponding to a specific food, for example *cheese: brie*. Columns include information about that food such as what food group it belongs to, a short description, and nutritional information such as the amount of calories, protein, fat, vitamins contained, etc.
+
+The analysis conducted only considers food that falls into the "fruit and fruit juice" group and "vegetables and vegetable juice" groups. It also only considers the first 11 nutritional attributes which are: Energy content, protein, fat, carbohydrates, sugar, fiber, Vitamin A, Vitamin B6, Vitamin B12, and Vitamin C and Vitamin E. 
+
+***
+
+####Analysis
+
+
+```{r, message = FALSE}
+
+#read in the data
+
+clim_data <- read_csv("world_env_vars.csv")
+
+food_data <- read_csv("usda_nutrients.csv")
+```
+
+
+Exploring missingness
+
+```{r, results = FALSE, fig.show = 'hide'}
+
+summary(clim_data)
+
+gg_miss_var(clim_data)
+
+#wind has a lot of missing varibles, plus some don't seem that interesting
+
+clim_data_clean <- clim_data %>% 
+  select(-wind)
+
+summary(food_data)
+gg_miss_var(food_data)
+
+#food data seems to be more consistent, so will start with that
+
+```
+
+
+Wrangling
+
+```{r, results = FALSE}
+
+food_groups <- unique(food_data$FoodGroup)
+
+#food_groups
+
+food_clean <- food_data %>% 
+  clean_names %>% 
+  mutate(
+    food_group = str_to_lower(food_group),
+    short_descrip = str_to_lower(short_descrip),
+    descrip = str_to_lower(descrip)
+  ) %>% 
+  select(-scientific_name, -common_name, -mfg_name) %>% 
+  filter(food_group == "fruits and fruit juices" | food_group == "vegetables and vegetable products") 
+
+vegan_nona <- food_clean %>% 
+  drop_na()
+
+
+```
+
+
+Run PCA
+
+```{r, message = FALSE, results= FALSE}
+
+vegan_pca <- prcomp(vegan_nona[5:15], scale = TRUE) #this specifies only columns 5:15 should be included
+
+vegan_pca
+```
+
+```{r, message = FALSE}
+
+summary(vegan_pca)
+
+
+autoplot(vegan_pca,
+                     colour = NA,
+                     loadings.label = TRUE,
+                     loadings.label.size = 3,
+                     loadings.label.colour = "black",
+                     loadings.label.repel = TRUE,
+         loadings.colour = "seagreen3") +
+  theme_bw()
+  
+
+```
+  
+  **Figure 1: Principal component analysis of nutrional value of fruits and vegetables.** Components that overlap in the same direction indicate high correlation between those variables, while components closer to a ninety degree angle indicate little correlation.  
+
+***
+
+####Discussion: 
+
+- From the PCA results, we can see that about 83% of the variance in the data can be explained by the first 6 components: Energy content, protein, fat, carbohydrates, sugar and fiber. This suggests that the fruits and vegetables in the USDA data differ more across those elements than they do across the vitamin contents. 
+
+- The biplot indicates how some of these data may be related to each other. Vitamin A, B12, C and E are all pretty close together and therefore highly correlated with each other. Meanwhile, sugar content approaches a 90 degree angle with Vitamin A, suggesting that there is a very low correlation between sugar content, Vitamin A content and the other Vitamins as well. 
+
+- Interestingly, vitamin B6 and protein seem to be fairly strongly correlated. 
+
+- Sugar content is more highly correlated with carbohydrates and energy than it is with fat.
+
+- None of the variables are negatively correlated.
+
+Overall, the results suggest that fruits and vegetables with high sugar content will not provide as many Vitamins as fruits and vegetables with lower sugar content. 
+
+  
+    
+    
+1. USDA, Food Data Central 
+2. Image credit to 

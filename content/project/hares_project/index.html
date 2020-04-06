@@ -1,0 +1,327 @@
+---
+title: "Trends in Snowshoe Hare Populations"
+author: "Madeline Berger"
+date: "2020-03-12"
+output: html_document
+summary: "Cleaning and visualizing data from the Bonanza Creek Experimental Forest"
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<hr />
+<div id="introduction" class="section level3">
+<h3>1. Introduction</h3>
+<p>This project uses data collected at the Bonanza Creek Experimental Forest<sup>1</sup> on snowshoe hares to visualize population trends over time and across sampling sites. The aim of this research is to track population fluctuations as snowshoe hares are important keystone species in the Tanana Valley ecosystem. Each line represents an individual hare that was captured, with the date and time of capture, grid location it was trapped at, trap number, sex, age, weight in grams, and hindfoot measurements.</p>
+</div>
+<div id="analysis" class="section level3">
+<h3>2. Analysis</h3>
+<div id="data-wrangling" class="section level4">
+<h4>Data Wrangling</h4>
+<pre class="r"><code>summary(hares)
+
+
+#what is grid? are there more than one?
+grid &lt;- unique(hares$grid)
+
+
+
+# parse and separate the dates, make everything lowercase, and group by both grid and trap and year and sex to try and see any patterns or duplicates we should we aware of. Guessing that there may be differences in different grid locations across years, and between sexes. Filter our any missing data
+
+
+hares_clean &lt;- hares %&gt;% 
+  mutate(
+    date = mdy(date) #from lubridate package
+  ) %&gt;% 
+  separate(date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep = &quot;-&quot;) %&gt;%
+   mutate(
+    grid = str_to_upper(grid),
+    trap = str_to_lower(trap),
+    sex = str_to_lower(sex)
+    ) %&gt;% 
+  filter(sex %in% c(&quot;m&quot;, &quot;f&quot;))
+
+
+
+#group by grid, year and sex to see average weights per year
+hares_summary &lt;- hares_clean %&gt;%
+  group_by(year, grid, sex) %&gt;% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex),
+    max_weigth = max(weight, na.rm = TRUE)
+  ) 
+  
+
+#group by year and sex, no grid
+
+hares_summary_year_sex &lt;- hares_clean %&gt;% 
+  group_by(year, sex) %&gt;% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex),
+    max_weigth = max(weight, na.rm = TRUE)
+  ) 
+
+
+
+#grouping by age instead of sex? age is kind of messy, maybe not
+
+hares_by_age &lt;- hares_clean %&gt;%
+  drop_na(age) %&gt;% 
+  group_by(year, age) %&gt;% 
+  summarize(
+    sample = length(age),
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1)
+  )
+  
+
+#are there anything interesting things happening within a grid among traps? answer: no, data is patchy
+hares_by_traps &lt;- hares_clean %&gt;% 
+  filter(grid == &quot;bonrip&quot;) %&gt;% 
+  filter(sex %in% c(&quot;m&quot;,&quot;f&quot;)) %&gt;% 
+  group_by(trap,sex) %&gt;% 
+  summarize(
+    avg_weight = mean(weight, na.rm = TRUE),
+    sample = length(weight)
+  )
+
+#what about over a certain timespan? Seems like there is inconsistent data between grids for some of the earlier years. This stretcg seems more consistent
+
+hares_2008_2012 &lt;- hares_summary %&gt;% 
+  filter(year &gt; 2007)
+
+
+#in order to make my table nicer, going to create separate summary dataframes for the two grids that have consistent data for my dates
+
+hares_bonrip &lt;- hares_clean %&gt;% 
+  filter(grid == &quot;BONRIP&quot;) %&gt;% 
+  filter(year &gt; 2007) %&gt;% 
+  group_by(year) %&gt;% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex)
+  )
+
+
+hares_bonbs &lt;- hares_clean %&gt;% 
+  filter(grid == &quot;BONBS&quot;) %&gt;% 
+  filter(year &gt; 2007) %&gt;% 
+  group_by(year) %&gt;% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex)
+  )</code></pre>
+</div>
+<div id="visualization" class="section level4">
+<h4>Visualization</h4>
+<div id="abundance-trends-across-all-years-and-sampling-sites" class="section level5">
+<h5>Abundance trends across all years and sampling sites:</h5>
+<pre class="r"><code>hares_all &lt;- ggplot(hares_summary_year_sex, aes(x = year, y = sample, group = sex))+
+  geom_line(aes(color = sex))+
+  geom_point(aes(color = sex), 
+             alpha = 0.5) +
+  scale_color_manual(values = c(&quot;lightgoldenrod2&quot;,&quot;palegreen3&quot;), 
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     guide = guide_legend(title = NULL))+  #gets rid of color legend but keeps the other
+  theme_bw()+
+  labs(x = &quot;Year&quot;, 
+       y = &quot;Count&quot;)
+
+hares_all</code></pre>
+<p><img src="/project/hares_project/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><strong>Figure 1: Hare populations across all sampling grids and all years from the Bonanza Creek<br />
+Experimental Forest LTER.</strong> The yellow line depicts the female count while the green line shows<br />
+the male count.</p>
+</div>
+<div id="abundance-trends-for-the-last-4-years-at-two-different-sampling-sites" class="section level5">
+<h5>Abundance trends for the last 4 years at two different sampling sites:</h5>
+<pre class="r"><code>#orginally, line graph shows count while size of bubble shows the average weight (not too much variance in for that dimension)
+
+
+hares_bubble &lt;- ggplot(hares_2008_2012, aes(x = year, y = sample, group = sex))+
+  geom_line(aes(color = sex))+
+  geom_point(aes(color = sex, 
+                 size = avg_weight), 
+             alpha = 0.5) +
+  facet_wrap(~grid) +
+  scale_color_manual(values = c(&quot;lightgoldenrod2&quot;,&quot;palegreen3&quot;), 
+                     labels = c(&quot;Female&quot;, &quot;Male&quot;),
+                     guide = guide_legend(title = NULL))+  #gets rid of color legend but keeps the other
+  guides(fill = TRUE, size = guide_legend(title = &quot;Average Weight (g)&quot;))+
+  labs(x = &quot;Year&quot;, 
+       y = &quot;Count&quot;)+
+  theme_minimal()
+
+hares_bubble</code></pre>
+<p><img src="/project/hares_project/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><strong>Figure 2: Hare populations at two different sampling grid sites in the Bonanza Creek<br />
+Experimental Forest from 2008 - 2012.</strong> The yellow line depicts the female count while<br />
+the green line shows the male count. The size of the points represent average weight for that<br />
+year.</p>
+</div>
+</div>
+<div id="summary-statistics" class="section level4">
+<h4>Summary Statistics</h4>
+<pre class="r"><code>#from the bubble chart can see there isn&#39;t a huge difference in weigth between males and females, so for the table decided to average across sexes
+
+hares_table_merge &lt;- merge(hares_bonrip, hares_bonbs, by = &quot;year&quot;) 
+  
+
+kable(hares_table_merge, 
+      col.names = c(&quot;Year&quot;, 
+                    &quot;Average Weight (g)&quot;, 
+                    &quot;Count&quot;, 
+                    &quot;Average Weight (g)&quot;, 
+                    &quot;Count&quot;), 
+      caption = &quot;Table 1. Summary statistics for snowshoe hares at the Bonanza Creek Experimental Forest, 2008 - 2012, separated by sampling grid location. Weight is averaged over both males and females, and count represents the total number of individuals trapped at that grid in a particular year.&quot;) %&gt;% 
+  add_header_above(c(&quot; &quot;= 1, &quot;Bonrip&quot;= 2, &quot;Bonbs &quot;= 2)) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;, 
+                full_width = F) %&gt;% 
+  footnote(symbol = c(&quot;Data Source: Bonanza Creek Experimental Forest LTER &quot;)) %&gt;%  
+  row_spec(5, color = &quot;red&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-4">Table 1: </span>Table 1. Summary statistics for snowshoe hares at the Bonanza Creek Experimental Forest, 2008 - 2012, separated by sampling grid location. Weight is averaged over both males and females, and count represents the total number of individuals trapped at that grid in a particular year.
+</caption>
+<thead>
+<tr>
+<th style="border-bottom:hidden" colspan="1">
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Bonrip
+</div>
+</th>
+<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Bonbs
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Year
+</th>
+<th style="text-align:right;">
+Average Weight (g)
+</th>
+<th style="text-align:right;">
+Count
+</th>
+<th style="text-align:right;">
+Average Weight (g)
+</th>
+<th style="text-align:right;">
+Count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2008
+</td>
+<td style="text-align:right;">
+1468.4
+</td>
+<td style="text-align:right;">
+149
+</td>
+<td style="text-align:right;">
+1295.6
+</td>
+<td style="text-align:right;">
+168
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2009
+</td>
+<td style="text-align:right;">
+1473.8
+</td>
+<td style="text-align:right;">
+142
+</td>
+<td style="text-align:right;">
+1287.6
+</td>
+<td style="text-align:right;">
+307
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2010
+</td>
+<td style="text-align:right;">
+1428.4
+</td>
+<td style="text-align:right;">
+220
+</td>
+<td style="text-align:right;">
+1362.2
+</td>
+<td style="text-align:right;">
+169
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2011
+</td>
+<td style="text-align:right;">
+1322.5
+</td>
+<td style="text-align:right;">
+112
+</td>
+<td style="text-align:right;">
+1465.3
+</td>
+<td style="text-align:right;">
+163
+</td>
+</tr>
+<tr>
+<td style="text-align:left;color: red !important;">
+2012
+</td>
+<td style="text-align:right;color: red !important;">
+1000.0
+</td>
+<td style="text-align:right;color: red !important;">
+2
+</td>
+<td style="text-align:right;color: red !important;">
+1324.2
+</td>
+<td style="text-align:right;color: red !important;">
+43
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup>*</sup> Data Source: Bonanza Creek Experimental Forest LTER
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+</div>
+<div id="discussion" class="section level3">
+<h3>3. Discussion</h3>
+<ul>
+<li><p>Overall, assuming sampling trends are representative of the population trends, the snowshoe hare population has fluctuated drastically from 1998 to 2012. Both males and females followed similar trends, with females outnumbering males consistently from 2003 until 2012.</p></li>
+<li><p>Population ecologists sometimes may be interested in differences between specific sampling sites. While there was not consistent data for each grid across the entire time span, there was consistent data for the BONRIP grid and BONBS grid for the last 4 years recorded, which saw a large decline in samples recorded overall. To explore any potential differences at these two sites, the abundance sampled and average weight per grid in each year were graphed for both male and female hares. The graph suggests that overall trends in both abundance and weight is similar at both grids, but that the “peak” year for each sampling site may be different. Also, at BONBS females outnumbered males for every year except 2011. At BONRIP, females outnumbered males every year except 2012.</p></li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative. <a href="https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14" class="uri">https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14</a>.</li>
+</ol>
+<p>Photo by Andy Brunner on Unsplash</p>
+</div>

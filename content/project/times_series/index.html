@@ -1,0 +1,113 @@
+---
+title: "Time series data wrangling, exploration and visualization"
+author: "Madeline Berger"
+date: "2020-03-10"
+output: html_document
+summary: 'Examining steelhead salmon crossings at the Bonneville Dam'
+---
+
+
+
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This project uses data on steelhead salmon fish passage at the Bonneville Dam on the Columbia River to explore time series data cleaning and visualization. The data was compiled by the U.S. Army Corps of Engineers and includes a value for daily number of fish that passed through the dam from 1940 to 2019. Also included is the data with a column for year and another column for month and day.</p>
+<p><em>References</em><br />
+Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text. Available from <a href="http://www.cbr.washington.edu/dart/query/adult_graph_text" class="uri">http://www.cbr.washington.edu/dart/query/adult_graph_text</a></p>
+<hr />
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<div id="data-cleaning-and-wrangling" class="section level3">
+<h3>Data Cleaning and Wrangling</h3>
+<p>To better visualize this data in multiple ways, the dates first need to be parsed into date format and cleaned. They are read in as character data, which will not work logically when graphed.</p>
+<pre class="r"><code>#check out some of the columns - are they all necessary?
+
+#unique(steelhead$datatype) #only one data type
+
+#min(steelhead$year)
+
+#first want to separate out the dates and parse data
+steelhead_clean &lt;- steelhead %&gt;%
+  mutate(
+    date = paste(year, mm_dd, sep = &quot;-&quot;)
+    ) %&gt;% 
+  mutate(
+    yr_mo_day = lubridate::parse_date_time(date, &quot;ydm&quot;),
+    yr_mo_day = as.Date(yr_mo_day), #since ours started out as characters
+    month_sep = yearmonth(yr_mo_day)
+  ) %&gt;% 
+  mutate(
+    month = month(yr_mo_day, label = TRUE),
+    value = as.numeric(value)
+  ) %&gt;% 
+  select(-mm_dd, -datatype, -location, -parameter) %&gt;% 
+  drop_na(month_sep, value)
+#check_NAs
+
+#steelhead_dates_final &lt;- steelhead_dates[,c(4,5,1,3,2)]</code></pre>
+</div>
+<div id="time-series-plot" class="section level3">
+<h3>Time Series Plot</h3>
+<pre class="r"><code>#daily data is challenging - plot the whole yr_mo_day
+
+steelhead_daily &lt;- ggplot(steelhead_clean, aes(x = yr_mo_day, y = value))+
+  geom_line(color = &quot;royalblue1&quot;) + 
+  theme_minimal()+
+  labs(x = &quot;Date&quot;, y = &quot;Steelhead salmon passge&quot;)
+
+steelhead_daily</code></pre>
+<p><img src="/project/times_series/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><strong>Figure 1. Daily steelhead salmon counts passing through Bonneville Dam on the Columbia River.</strong> Counts were recorded daily from 1940 to 2019.</p>
+</div>
+<div id="seasonplot" class="section level3">
+<h3>Seasonplot</h3>
+<pre class="r"><code>#group by month
+steelhead_by_month &lt;- steelhead_clean %&gt;%
+  group_by(month, year) %&gt;% 
+  summarize(
+    month_tot = sum(value)
+  ) 
+
+
+#plot 
+steelhead_seasonplot &lt;- ggplot(data = steelhead_by_month , aes(x = month, y = month_tot, group = year)) +
+   geom_line(aes(color = year))+
+  theme_minimal()+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0, 400000, by = 50000), labels = scales::comma)+
+  labs(x = &quot;Month&quot;, y = &quot;Total steelhead salmon passage&quot;, color = &quot;Year&quot;)
+
+
+steelhead_seasonplot +
+  scale_color_paletteer_c(&quot;pals::warmcool&quot;)</code></pre>
+<p><img src="/project/times_series/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><strong>Figure 2. Monthly steelhead salmon passge at the Bonneville Dam on the Columbia River.</strong> Each line depicts a different year, with red colors indicating earlier recordings and blue colors indicating more recent data.</p>
+</div>
+<div id="annual-steelhead-passage" class="section level3">
+<h3>Annual Steelhead passage</h3>
+<pre class="r"><code>#group by year
+steelhead_by_year &lt;- steelhead_clean %&gt;%
+  group_by(year) %&gt;% 
+  summarize(
+    yearly_tot = sum(value)
+  ) 
+
+
+steelhead_yearly &lt;- ggplot(steelhead_by_year, aes(x = year, y = yearly_tot))+
+  geom_line(color = &quot;salmon&quot;)+
+  scale_y_continuous(expand = c(0,0), breaks = seq(0, 600000, by = 100000), labels = scales::comma)+
+  theme_minimal()+
+  labs(x = &quot;Year&quot;, y = &quot;Steelhead salmon passage&quot;)
+
+steelhead_yearly</code></pre>
+<p><img src="/project/times_series/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><strong>Figure 3. Yearly steelhead salmon trends at Bonneville Dam, Orgeon.</strong> The y-axis depicts the total number of fish counted at the dam for each year, ranging from 1940 to 2019.</p>
+<hr />
+</div>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>From these visualizations, we can see how steelhead numbers in the Columbia River have varied over time, as well as seasonaly. The daily passage time series plot indicates that steelhead counts have been somewhat consistent over time, with some cyclical patterns. The exception is one day in 2009 that had very high counts.</p>
+<p>The season plot helps illuminate what may be driving some of the cyclical trends in the time series plot. Every year, there is a clear increase in steelhead salmon passage starting from June to Octover, peaking dramatically in August. However, we can see there have been differences in the magnitude of this peak over the years. There appears to be an increasing trend from 1940 - 2019.</p>
+<p>The annual passage plot confirms this observation, showing that total yearly counts of steelhead started increasing in 1980, but then have decreased since 2010.</p>
+</div>

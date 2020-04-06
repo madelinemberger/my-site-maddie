@@ -1,0 +1,254 @@
+---
+title: "Exploring Hawaiian landcover and watersheds"
+author: "Madeline Berger"
+date: "2020-03-07"
+output: html_document
+summary: 'Building static and interactive maps with vector data'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+
+
+library(tidyverse)
+library(sf)
+library(tmap)
+library(here)
+library(ggspatial)
+library(paletteer)
+
+lulc <- read_sf(dsn = ".", layer = "Land_Use_Land_Cover_LULC") %>% 
+  select(landcover)
+
+watersheds <- read_sf(dsn = ".", layer = "Watersheds")
+
+```
+
+
+***
+###Introduction
+
+This project uses the sf packages and ggplot to visualize spatial data on landcover and watersheds on the Hawaiian Islands. The data was obtained from the Hawaii Government website.
+
+
+*References*  
+
+Land use/land cover data: http://geoportal.hawaii.gov/datasets/land-use-land-cover-lulc
+Watershed data: http://geoportal.hawaii.gov/datasets/watersheds
+
+
+###Explore the data
+```{r, results = 'hide'}
+#intial exploration
+#plot(lulc)
+
+#may want to just visualize a few land use or land covers, or just one island.
+
+unique(lulc$landcover)
+
+#there are a lot of land uses / cover. I'm going to distill some of the uses into broader categories
+
+```
+
+###Data cleaning and wrangling 
+
+**Land use and land cover data**
+```{r, results= 'hide'}
+
+#I am more interested in the natural land areas, so am going to combine the data based on some of the metadata categories
+lulc_simple_2 <- lulc %>% 
+  mutate(
+    landcover = case_when(
+      landcover %in% c("Residential",
+                       "Other Urban or Built-up Land", 
+                       "Commercial and Services", 
+                       "Industrial", 
+                       "Transportation, Communications and Utilities",
+                       "Mixed Urban or Built-up Land", 
+                       "Industrial and Commercial Complexes"   ) ~"Urban",
+      landcover %in% c("Cropland and Pasture", 
+                       "Orchards, Groves, Vineyards, Nurseries and Ornamental Horticultural Areas", 
+                       "Other Agricultural Land",
+                       "Confined Feeding Operations") ~ "Agricultural",
+      landcover %in% c("Herbaceous Rangeland",
+                       "Shrub and Brush Rangeland",
+                       "Mixed Rangeland") ~ "Rangeland",
+      landcover %in% c("Lakes",
+                       "Streams and Canals",
+                       "Reservoirs",
+                       "Bays and Estuaries") ~ "Waterways",
+      landcover %in% c("Mixed Barren Land",
+                       "Transitional Areas",
+                       "Bare Exposed Rock",
+                       "Sandy Areas Other than Beaches") ~ "Barren Land",
+      landcover %in% c("Nonforested Wetland",
+                       "Forested Wetland"
+                       ) ~ "Wetland",
+      TRUE ~ landcover) #keep the rest the same
+  ) %>% 
+  filter(landcover != 0)
+
+#unique(lulc_simple_2$landcover)
+
+#lulc_simple_2
+
+#plot(lulc_simple_2)
+
+
+```
+
+**Watershed data**
+```{r, results = 'hide'}
+
+#get rid of the some of the columns to simplify the data
+
+watersheds_simple <- watersheds %>%
+  select(wuname, hucarea, area_sqmi)
+
+#plot(watersheds_simple)
+
+
+```
+
+
+###Visualize
+**Landcover**
+```{r, results = 'hide'}
+
+
+#get colors of palettes
+paletteer_d("calecopal::figmtn")
+paletteer_d("calecopal::agriculture")
+
+
+#how many land uses do I have?
+unique(lulc_simple_2$landcover)
+
+#build graph
+hawaii_all <- ggplot(data = lulc_simple_2)+
+  geom_sf(data = lulc_simple_2, 
+          color = NA, 
+          aes(fill = landcover))+
+  annotation_scale(location = "bl", 
+                   width_hint = 0.5) +
+    annotation_north_arrow(location = "bl", 
+                           which_north = "true", 
+         pad_x = unit(0.5, "cm"), 
+         pad_y = unit(0.5, "cm"),
+        style = north_arrow_fancy_orienteering)+
+  #scale_fill_paletteer_d("calecopal::figmtn")+
+  scale_fill_manual(breaks = c("Agricultural", 
+                               "Barren Land", 
+                               "Beaches",
+                               "Evergreen Forest Land",
+                               "Rangeland",
+                               "Wetland",
+                               "Waterways",
+                              "Urban",
+                              "Strip Mines, Quarries, and Gravel Pits"
+                               ),
+                    values = c("#E29244FF",
+                               "#FFAA00FF",
+                               "#D46F10FF",
+                               "#4CA49EFF",
+                               "#88B063FF",
+                               "#69B9FAFF",
+                               "#4B8FF7FF",
+                                "#6B6D9FFF",
+                                "#CECEB9FF"
+                              ))+
+  theme(panel.grid.major = element_line(color = gray(.1), 
+                                        linetype = "dashed", size = 0.1), 
+        panel.background = element_rect(fill = "aliceblue")
+  )+
+  labs(x = "Longitude", y = "Latitude")+
+  guides(fill = guide_legend(title = "Landcover"))
+
+
+  
+
+#a smaller version
+hawaii_big_is <- hawaii_all +
+  coord_sf(xlim = c(-156.5, -154.5), ylim = c(18.8, 20.3), expand = FALSE)
+
+hawaii_all
+
+```
+
+**Figure 1. Landcover types on the Hawaiian Islands.** Different colors show different landcover or land use types.
+
+```{r}
+
+hawaii_big_is
+
+```
+  
+**Figure 2. Landcover on the big island of Hawaii.** Different colors how different landcover or land use types. 
+
+
+
+**Watersheds**
+```{r, }
+
+#create similar graphs showing watersheds
+
+watersheds_all <- ggplot(data = watersheds_simple)+
+  geom_sf(data = watersheds_simple, 
+          color = NA, 
+          aes(fill = area_sqmi))+
+  annotation_scale(location = "bl", width_hint = 0.5) +
+    annotation_north_arrow(location = "bl", which_north = "true", 
+         pad_x = unit(0.5, "cm"), pad_y = unit(0.5, "cm"),
+        style = north_arrow_fancy_orienteering)+
+  scale_fill_paletteer_c("pals::ocean.deep")+
+  theme(panel.grid.major = element_line(color = gray(.1), 
+                                        linetype = "dashed", size = 0.1), 
+        panel.background = element_rect(fill = "aliceblue")
+  )+
+  labs(x = "Longitude", y = "Latitude", fill = "Area in square miles")
+
+
+
+watersheds_big <- watersheds_all + 
+  coord_sf(xlim = c(-156.5, -154.5), ylim = c(18.8, 20.3), expand = FALSE)
+
+watersheds_all
+
+
+
+```
+  
+    
+**Figure 3. Watersheds of the Hawaiian Islands.** Area in square miles is represented by color, with smaller watersheds appearing in yellow and green and larger watersheds in blue. 
+
+
+```{r}
+watersheds_big
+```
+  
+    
+**Figure 4. Watersheds on the big island of Hawaii.** Area in square miles is represented by color, with smaller watersheds appearing in yellow and green and larger watersheds in blue. 
+
+
+
+##Interactive Watershed map
+```{r}
+tmap_mode("view") #interactive viewing
+
+tm_shape(lulc_simple_2)+
+  tm_fill("landcover", title = "Landcover", legend.show = FALSE)+
+tm_shape(watersheds_simple) +
+  #tm_fill("area_sqmi", title = "Area in sq. miles", alpha = 0.7)+
+  tm_borders("black")+
+  tm_basemap("Esri.OceanBasemap")
+
+
+```
+
+**Figure 5** This interactive map shows both the landcover types and the watersheds of the Hawaiian islands. The landcover type can be determined by scrolling over the different colors. The watershed boundaries are depcited with black lines. 
+
+
+
+1. Photo by Heather Morse

@@ -1,0 +1,235 @@
+---
+title: "Trends in Snowshoe Hare Populations"
+author: "Madeline Berger"
+date: "2020-03-12"
+output: html_document
+summary: "Cleaning and visualizing data from the Bonanza Creek Experimental Forest"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
+library(lubridate)
+library(ggfortify)
+library(naniar)
+library(VIM)
+library(png)
+library(RColorBrewer)
+
+hares <- read_csv("showshoe_lter.csv")
+
+#note to self: ununsed arguments means there is a conflicting function in another packag (lubridate has a here function)
+
+```
+
+
+
+***
+
+###1. Introduction
+
+This project uses data collected at the Bonanza Creek Experimental Forest^1^ on snowshoe hares to visualize population trends over time and across sampling sites. The aim of this research is to track population fluctuations as snowshoe hares are important keystone species in the Tanana Valley ecosystem. Each line represents an individual hare that was captured, with the date and time of capture, grid location it was trapped at, trap number, sex, age, weight in grams, and hindfoot measurements.  
+
+###2. Analysis
+
+####Data Wrangling
+```{r, results=FALSE}
+summary(hares)
+
+
+#what is grid? are there more than one?
+grid <- unique(hares$grid)
+
+
+
+# parse and separate the dates, make everything lowercase, and group by both grid and trap and year and sex to try and see any patterns or duplicates we should we aware of. Guessing that there may be differences in different grid locations across years, and between sexes. Filter our any missing data
+
+
+hares_clean <- hares %>% 
+  mutate(
+    date = mdy(date) #from lubridate package
+  ) %>% 
+  separate(date, into = c("year", "month", "day"), sep = "-") %>%
+   mutate(
+    grid = str_to_upper(grid),
+    trap = str_to_lower(trap),
+    sex = str_to_lower(sex)
+    ) %>% 
+  filter(sex %in% c("m", "f"))
+
+
+
+#group by grid, year and sex to see average weights per year
+hares_summary <- hares_clean %>%
+  group_by(year, grid, sex) %>% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex),
+    max_weigth = max(weight, na.rm = TRUE)
+  ) 
+  
+
+#group by year and sex, no grid
+
+hares_summary_year_sex <- hares_clean %>% 
+  group_by(year, sex) %>% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex),
+    max_weigth = max(weight, na.rm = TRUE)
+  ) 
+
+
+
+#grouping by age instead of sex? age is kind of messy, maybe not
+
+hares_by_age <- hares_clean %>%
+  drop_na(age) %>% 
+  group_by(year, age) %>% 
+  summarize(
+    sample = length(age),
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1)
+  )
+  
+
+#are there anything interesting things happening within a grid among traps? answer: no, data is patchy
+hares_by_traps <- hares_clean %>% 
+  filter(grid == "bonrip") %>% 
+  filter(sex %in% c("m","f")) %>% 
+  group_by(trap,sex) %>% 
+  summarize(
+    avg_weight = mean(weight, na.rm = TRUE),
+    sample = length(weight)
+  )
+
+#what about over a certain timespan? Seems like there is inconsistent data between grids for some of the earlier years. This stretcg seems more consistent
+
+hares_2008_2012 <- hares_summary %>% 
+  filter(year > 2007)
+
+
+#in order to make my table nicer, going to create separate summary dataframes for the two grids that have consistent data for my dates
+
+hares_bonrip <- hares_clean %>% 
+  filter(grid == "BONRIP") %>% 
+  filter(year > 2007) %>% 
+  group_by(year) %>% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex)
+  )
+
+
+hares_bonbs <- hares_clean %>% 
+  filter(grid == "BONBS") %>% 
+  filter(year > 2007) %>% 
+  group_by(year) %>% 
+  summarize(
+    avg_weight = round(mean(weight, na.rm = TRUE), digits = 1),
+    sample = length(sex)
+  )
+
+```
+
+
+
+####Visualization
+
+#####Abundance trends across all years and sampling sites:
+```{r}
+
+hares_all <- ggplot(hares_summary_year_sex, aes(x = year, y = sample, group = sex))+
+  geom_line(aes(color = sex))+
+  geom_point(aes(color = sex), 
+             alpha = 0.5) +
+  scale_color_manual(values = c("lightgoldenrod2","palegreen3"), 
+                     labels = c("Female", "Male"),
+                     guide = guide_legend(title = NULL))+  #gets rid of color legend but keeps the other
+  theme_bw()+
+  labs(x = "Year", 
+       y = "Count")
+
+hares_all
+
+
+
+```
+  
+  **Figure 1: Hare populations across all sampling grids and all years from the Bonanza Creek  
+Experimental Forest LTER.** The yellow line depicts the female count while the green line shows  
+the male count.
+
+#####Abundance trends for the last 4 years at two different sampling sites: 
+```{r}
+
+#orginally, line graph shows count while size of bubble shows the average weight (not too much variance in for that dimension)
+
+
+hares_bubble <- ggplot(hares_2008_2012, aes(x = year, y = sample, group = sex))+
+  geom_line(aes(color = sex))+
+  geom_point(aes(color = sex, 
+                 size = avg_weight), 
+             alpha = 0.5) +
+  facet_wrap(~grid) +
+  scale_color_manual(values = c("lightgoldenrod2","palegreen3"), 
+                     labels = c("Female", "Male"),
+                     guide = guide_legend(title = NULL))+  #gets rid of color legend but keeps the other
+  guides(fill = TRUE, size = guide_legend(title = "Average Weight (g)"))+
+  labs(x = "Year", 
+       y = "Count")+
+  theme_minimal()
+
+hares_bubble
+
+```
+  
+**Figure 2: Hare populations at two different sampling grid sites in the Bonanza Creek  
+Experimental Forest from 2008 - 2012.** The yellow line depicts the female count while  
+the green line shows the male count. The size of the points represent average weight for that  
+year.
+
+####Summary Statistics
+```{r}
+#from the bubble chart can see there isn't a huge difference in weigth between males and females, so for the table decided to average across sexes
+
+hares_table_merge <- merge(hares_bonrip, hares_bonbs, by = "year") 
+  
+
+kable(hares_table_merge, 
+      col.names = c("Year", 
+                    "Average Weight (g)", 
+                    "Count", 
+                    "Average Weight (g)", 
+                    "Count"), 
+      caption = "Table 1. Summary statistics for snowshoe hares at the Bonanza Creek Experimental Forest, 2008 - 2012, separated by sampling grid location. Weight is averaged over both males and females, and count represents the total number of individuals trapped at that grid in a particular year.") %>% 
+  add_header_above(c(" "= 1, "Bonrip"= 2, "Bonbs "= 2)) %>% 
+  kable_styling(bootstrap_options = "striped", 
+                full_width = F) %>% 
+  footnote(symbol = c("Data Source: Bonanza Creek Experimental Forest LTER ")) %>%  
+  row_spec(5, color = "red")
+
+```
+
+
+###3. Discussion
+
+- Overall, assuming sampling trends are representative of the population trends, the snowshoe hare population has fluctuated drastically from 1998 to 2012. Both males and females followed similar trends, with females outnumbering males consistently from 2003 until 2012. 
+
+- Population ecologists sometimes may be interested in differences between specific sampling sites. While there was not consistent data for each grid across the entire time span, there was consistent data for the BONRIP grid and BONBS grid for the last 4 years recorded, which saw a large decline in samples recorded overall. To explore any potential differences at these two sites, the abundance sampled and average weight per grid in each year were graphed for both male and female hares. The graph suggests that overall trends in both abundance and weight is similar at both grids, but that the "peak" year for each sampling site may be different. Also, at BONBS females outnumbered males for every year except 2011. At BONRIP, females outnumbered males every year except 2012.   
+  
+    
+
+  
+  
+
+  
+1. Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative. https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14. 
+
+Photo by Andy Brunner on Unsplash
