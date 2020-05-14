@@ -132,9 +132,9 @@ autoplot(vegan_pca,
 
 - From the PCA results, we can see that about 83% of the variance in the data can be explained by the first 6 components: Energy content, protein, fat, carbohydrates, sugar and fiber. This suggests that the fruits and vegetables in the USDA data differ more across those elements than they do across the vitamin contents. 
 
-- The biplot indicates how some of these data may be related to each other. Vitamin A, B12, C and E are all pretty close together and therefore highly correlated with each other. Meanwhile, sugar content approaches a 90 degree angle with Vitamin A, suggesting that there is a very low correlation between sugar content, Vitamin A content and the other Vitamins as well. 
+- The biplot indicates how some of these data may be related to each other. Vitamin A, B12, C and E are all pretty close together and therefore highly correlated with one another. Meanwhile, sugar content approaches a 90 degree angle with Vitamin A, suggesting that there is a very low correlation between sugar content and Vitamin A. 
 
-- Interestingly, vitamin B6 and protein seem to be fairly strongly correlated. 
+- Interestingly, Vitamin B6 and protein content seem to be fairly correlated. 
 
 - Sugar content is more highly correlated with carbohydrates and energy than it is with fat.
 
@@ -143,7 +143,3 @@ autoplot(vegan_pca,
 Overall, the results suggest that fruits and vegetables with high sugar content will not provide as many Vitamins as fruits and vegetables with lower sugar content. 
 
   
-    
-    
-1. USDA, Food Data Central 
-2. Image credit to 
