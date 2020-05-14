@@ -43,6 +43,11 @@
   </url>
   
   <url>
+    <loc>/project/pca_project/</loc>
+    <lastmod>2020-03-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/post/</loc>
     <lastmod>2019-09-05T00:00:00+00:00</lastmod>
   </url>
@@ -197,10 +202,6 @@
   
   <url>
     <loc>/project/external-project/</loc>
-  </url>
-  
-  <url>
-    <loc>/project/pca_project/</loc>
   </url>
   
 </urlset>
