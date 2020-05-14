@@ -29,9 +29,13 @@ library(RColorBrewer)
 ####Introduction
 
 
-This project was used to practice Principal Component Analysis (PCA). First, two potential datasets (climate variables or nutrition data^1^) are examined for missingess, and then one is chosen to run a PCA and visualize the results. The data used for the PCA contains rows corresponding to a specific food, for example *cheese: brie*. Columns include information about that food such as what food group it belongs to, a short description, and nutritional information such as the amount of calories, protein, fat, vitamins contained, etc.
+This project was used to practice Principal Component Analysis (PCA). First, I examined two potential datasets (climate variables or nutrition data^1^) for missingess, and then chose one to run a PCA and visualize the results. The data used for the PCA contains rows corresponding to a specific food, for example *cheese: brie*. Columns include information about that food such as what food group it belongs to, a short description, and nutritional information such as the amount of calories, protein, fat, vitamins contained, etc.
 
-The analysis conducted only considers food that falls into the "fruit and fruit juice" group and "vegetables and vegetable juice" groups. It also only considers the first 11 nutritional attributes which are: Energy content, protein, fat, carbohydrates, sugar, fiber, Vitamin A, Vitamin B6, Vitamin B12, and Vitamin C and Vitamin E. 
+The analysis conducted only considers food that falls into the "fruit and fruit juice" and "vegetables and vegetable juice" groups. It also only considers the first 11 nutritional attributes which are: Energy content, protein, fat, carbohydrates, sugar, fiber, Vitamin A, Vitamin B6, Vitamin B12, and Vitamin C and Vitamin E.   
+
+*References*  
+1. USDA, Food Data Central 
+2. Image credit to Brook Lark on Unsplash
 
 ***
 

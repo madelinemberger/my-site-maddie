@@ -1,5 +1,5 @@
 ---
-title: "Exploring Hawaiian landcover and watersheds"
+title: "Mapping Hawaiian landcover and watersheds"
 author: "Madeline Berger"
 date: "2020-03-07"
 output: html_document
