@@ -29,7 +29,7 @@ hares <- read_csv("showshoe_lter.csv")
 
 ```
 
-
+*Photo by Andy Brunner on Unsplash*
 
 ***
 
