@@ -232,4 +232,4 @@ kable(hares_table_merge,
   
 1. Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative. https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14. 
 
-Photo by Andy Brunner on Unsplash
+2. Photo by Andy Brunner on Unsplash
