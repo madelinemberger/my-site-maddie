@@ -35,9 +35,9 @@ This project uses the sf packages and ggplot to visualize spatial data on landco
 
 *References*  
 
-Land use/land cover data: http://geoportal.hawaii.gov/datasets/land-use-land-cover-lulc
-Watershed data: http://geoportal.hawaii.gov/datasets/watersheds
-
+1. Land use/land cover data: http://geoportal.hawaii.gov/datasets/land-use-land-cover-lulc  
+2. Watershed data: http://geoportal.hawaii.gov/datasets/watersheds
+3. Photo by Heather Morse
 
 ###Explore the data
 ```{r, results = 'hide'}
@@ -247,8 +247,7 @@ tm_shape(watersheds_simple) +
 
 ```
 
-**Figure 5** This interactive map shows both the landcover types and the watersheds of the Hawaiian islands. The landcover type can be determined by scrolling over the different colors. The watershed boundaries are depcited with black lines. 
+**Figure 5. Interactive watershed map** This interactive map shows both the landcover types and the watersheds of the Hawaiian islands. The landcover type can be determined by scrolling over the different colors. The watershed boundaries are depcited with black lines. 
 
 
 
-1. Photo by Heather Morse

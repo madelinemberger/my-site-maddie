@@ -220,14 +220,13 @@ kable(hares_table_merge,
 
 ###3. Discussion
 
-- Overall, assuming sampling trends are representative of the population trends, the snowshoe hare population has fluctuated drastically from 1998 to 2012. Both males and females followed similar trends, with females outnumbering males consistently from 2003 until 2012. 
+- Overall, assuming sampling trends are representative of the population trends, the snowshoe hare population has fluctuated drastically from 1998 to 2012. Both males and females followed similar trends over time, but with females outnumbering males consistently from 2003 until 2012. 
 
-- Population ecologists sometimes may be interested in differences between specific sampling sites. While there was not consistent data for each grid across the entire time span, there was consistent data for the BONRIP grid and BONBS grid for the last 4 years recorded, which saw a large decline in samples recorded overall. To explore any potential differences at these two sites, the abundance sampled and average weight per grid in each year were graphed for both male and female hares. The graph suggests that overall trends in both abundance and weight is similar at both grids, but that the "peak" year for each sampling site may be different. Also, at BONBS females outnumbered males for every year except 2011. At BONRIP, females outnumbered males every year except 2012.   
+- Population ecologists sometimes may be interested in differences between specific sampling sites. While there did not exist consistent data for each grid across the entire time span, there was consistent data for the BONRIP grid and BONBS grid for the last 4 years recorded. To explore any potential differences at these two sites, the number of hares recorded and average weight per grid in each year were graphed for both male and female hares. The graph suggests that overall trends in both abundance and weight are similar at both grids, but that the "peak" year in terms of number of hares sampled may be different. Also, at BONBS females outnumbered males for every year except 2011. At BONRIP, females outnumbered males every year except 2012.   
   
-    
 
   
-  
+###4. References  
 
   
 1. Kielland K., F. S. Chapin, R. W. Ruess. 2017. Snowshoe hare physical data in Bonanza Creek Experimental Forest: 1999-Present. Environmental Data Initiative. https://doi.org/10.6073/pasta/03dce4856d79b91557d8e6ce2cbcdc14. 

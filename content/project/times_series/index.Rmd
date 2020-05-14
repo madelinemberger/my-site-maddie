@@ -39,7 +39,9 @@ This project uses data on steelhead salmon fish passage at the Bonneville Dam on
 
 
 *References*  
-Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text. Available from http://www.cbr.washington.edu/dart/query/adult_graph_text  
+1. Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics & Text. Available from http://www.cbr.washington.edu/dart/query/adult_graph_text  
+
+2. Photo by Dave Rotb on Unsplash
   
 ***  
 
@@ -81,7 +83,8 @@ steelhead_clean <- steelhead %>%
 ```
 
 
-###Time Series Plot
+###Daily Steelhead Passage
+Visualize daily passage with a time series plot:
 ```{r}
 #daily data is challenging - plot the whole yr_mo_day
 
@@ -99,8 +102,8 @@ steelhead_daily
 **Figure 1. Daily steelhead salmon counts passing through Bonneville Dam on the Columbia River.** Counts were recorded daily from 1940 to 2019.
 
 
-###Seasonplot
-
+###Monthly steelhead passage
+This can be visualized with a seasonplot:
 ```{r}
 #group by month
 steelhead_by_month <- steelhead_clean %>%
@@ -156,9 +159,9 @@ steelhead_yearly
 
 ##Results
 
-From these visualizations, we can see how steelhead numbers in the Columbia River have varied over time, as well as seasonaly. The daily passage time series plot indicates that steelhead counts have been somewhat consistent over time, with some cyclical patterns. The exception is one day in 2009 that had very high counts.
+From these visualizations, we can see how steelhead numbers in the Columbia River have varied each year and each season. The daily passage time series plot indicates that daily steelhead counts have been somewhat consistent over time following a cyclical pattern. The exception is one day in 2009 that had very high counts.
 
-The season plot helps illuminate what may be driving some of the cyclical trends in the time series plot. Every year, there is a clear increase in steelhead salmon passage starting from June to Octover, peaking dramatically in August. However, we can see there have been differences in the magnitude of this peak over the years. There appears to be an increasing trend from 1940 - 2019.
+The season plot helps illuminate what may be driving some of the cyclical trends in the time series plot. Every year, there is a clear increase in steelhead salmon passage starting from June to October, peaking dramatically in August. However, we can see there have been differences in the magnitude of this peak over the years. There appears to be an increasing trend from 1940 - 2019.
 
 The annual passage plot confirms this observation, showing that total yearly counts of steelhead started increasing in 1980, but then have decreased since 2010. 
 
