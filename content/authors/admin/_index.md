@@ -17,9 +17,9 @@ interests:
 - Data science
 name: Madeline Berger
 organizations:
-- name: UCSB Bren School of Environmental Science and Management
+- name: National Center for Ecological Analysis and Synthesis
   url: "http://www.bren.ucsb.edu/"
-role: Master's student
+role: Ocean Health Index Fellow
 social:
 - icon: envelope
   icon_pack: fas

@@ -192,7 +192,7 @@
   
   
   
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cutive+Mono%7CLora:400,700%7CRoboto:400,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather%7CRoboto+Mono&display=swap">
   
 
   
@@ -646,7 +646,10 @@
 <h2>Introduction</h2>
 <p>This project uses data on steelhead salmon fish passage at the Bonneville Dam on the Columbia River to explore time series data cleaning and visualization. The data was compiled by the U.S. Army Corps of Engineers and includes a value for daily number of fish that passed through the dam from 1940 to 2019. Also included is the data with a column for year and another column for month and day.</p>
 <p><em>References</em><br />
-Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text. Available from <a href="http://www.cbr.washington.edu/dart/query/adult_graph_text" class="uri">http://www.cbr.washington.edu/dart/query/adult_graph_text</a></p>
+1. Columbia River DART, Columbia Basin Research, University of Washington. (2019). Adult Passage Graphics &amp; Text. Available from <a href="http://www.cbr.washington.edu/dart/query/adult_graph_text" class="uri">http://www.cbr.washington.edu/dart/query/adult_graph_text</a></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Photo by Dave Rotb on Unsplash</li>
+</ol>
 <hr />
 </div>
 <div id="analysis" class="section level2">
@@ -680,8 +683,9 @@ steelhead_clean &lt;- steelhead %&gt;%
 
 #steelhead_dates_final &lt;- steelhead_dates[,c(4,5,1,3,2)]</code></pre>
 </div>
-<div id="time-series-plot" class="section level3">
-<h3>Time Series Plot</h3>
+<div id="daily-steelhead-passage" class="section level3">
+<h3>Daily Steelhead Passage</h3>
+<p>Visualize daily passage with a time series plot:</p>
 <pre class="r"><code>#daily data is challenging - plot the whole yr_mo_day
 
 steelhead_daily &lt;- ggplot(steelhead_clean, aes(x = yr_mo_day, y = value))+
@@ -693,8 +697,9 @@ steelhead_daily</code></pre>
 <p><img src="/project/times_series/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p><strong>Figure 1. Daily steelhead salmon counts passing through Bonneville Dam on the Columbia River.</strong> Counts were recorded daily from 1940 to 2019.</p>
 </div>
-<div id="seasonplot" class="section level3">
-<h3>Seasonplot</h3>
+<div id="monthly-steelhead-passage" class="section level3">
+<h3>Monthly steelhead passage</h3>
+<p>This can be visualized with a seasonplot:</p>
 <pre class="r"><code>#group by month
 steelhead_by_month &lt;- steelhead_clean %&gt;%
   group_by(month, year) %&gt;% 
@@ -740,8 +745,8 @@ steelhead_yearly</code></pre>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
-<p>From these visualizations, we can see how steelhead numbers in the Columbia River have varied over time, as well as seasonaly. The daily passage time series plot indicates that steelhead counts have been somewhat consistent over time, with some cyclical patterns. The exception is one day in 2009 that had very high counts.</p>
-<p>The season plot helps illuminate what may be driving some of the cyclical trends in the time series plot. Every year, there is a clear increase in steelhead salmon passage starting from June to Octover, peaking dramatically in August. However, we can see there have been differences in the magnitude of this peak over the years. There appears to be an increasing trend from 1940 - 2019.</p>
+<p>From these visualizations, we can see how steelhead numbers in the Columbia River have varied each year and each season. The daily passage time series plot indicates that daily steelhead counts have been somewhat consistent over time following a cyclical pattern. The exception is one day in 2009 that had very high counts.</p>
+<p>The season plot helps illuminate what may be driving some of the cyclical trends in the time series plot. Every year, there is a clear increase in steelhead salmon passage starting from June to October, peaking dramatically in August. However, we can see there have been differences in the magnitude of this peak over the years. There appears to be an increasing trend from 1940 - 2019.</p>
 <p>The annual passage plot confirms this observation, showing that total yearly counts of steelhead started increasing in 1980, but then have decreased since 2010.</p>
 </div>
 
@@ -787,7 +792,7 @@ steelhead_yearly</code></pre>
 
     <div class="media-body">
       <h5 class="card-title"><a href="/">Madeline Berger</a></h5>
-      <h6 class="card-subtitle">Master's student</h6>
+      <h6 class="card-subtitle">Ocean Health Index Fellow</h6>
       <p class="card-text">My interests include conservation, food systems, and data analysis.</p>
       <ul class="network-icon" aria-hidden="true">
   
