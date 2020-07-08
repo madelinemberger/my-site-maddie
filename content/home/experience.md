@@ -19,12 +19,22 @@ date_format = "Jan 2006"
 #   Begin/end multi-line descriptions with 3 quotes `"""`.
 
 [[experience]]
+  title = "Ocean Health Index Fellow"
+  company = "National Center for Ecological Analysis and Synthesis"
+  company_url = ""
+  location = "California"
+  date_start = "2020-04-01"
+  date_end = ""
+  #description = """Compile, clean and analyze spatial data from large scale farm experiment in Punjab, India."""
+
+
+[[experience]]
   title = "Research Assistant"
   company = "University of California Santa Barbara"
   company_url = ""
   location = "California"
   date_start = "2019-10-01"
-  date_end = ""
+  date_end = "2020-06-01"
   description = """Compile, clean and analyze spatial data from large scale farm experiment in Punjab, India."""
 
 [[experience]]
